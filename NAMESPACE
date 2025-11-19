@@ -1,5 +1,7 @@
 export(load_adb_mrio)
 export(compute_bilateral)
 export(compute_national)
+export(calculate_full_year_gvc)
+export(get_sector_to_sector_matrix)
 import(Matrix)
 import(data.table)
