@@ -27,5 +27,9 @@ Imports:
     data.table
 Suggests: 
     openxlsx,
-    devtools
+    devtools,
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
 

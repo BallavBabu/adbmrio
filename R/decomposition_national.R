@@ -1,5 +1,3 @@
-# R/decomposition_national.R
-
 #' National 5-Part GVC Decomposition (Macro Analysis)
 #'
 #' Performs a national-level decomposition of Gross Output ($X$), Value Added ($VA$), 
@@ -14,23 +12,24 @@
 #'   \item \strong{Exp_Int}: Intermediate exports absorbed by the direct importer.
 #'   \item \strong{Exp_GVC}: Intermediate exports involved in complex GVCs (re-exports).
 #' }
-#' The function applies a clipping method (\code{pmax(x, 0)}) to handle numerical precision artifacts
-#' common in sparse matrix operations.
 #'
 #' @param mrio_panel The list object loaded via \code{\link{load_adb_mrio}}.
 #' @param year Integer. The specific year to analyze (e.g., 2021).
 #'
-#' @return A \code{data.table} with the following columns for all 63 countries and 35 sectors:
-#' \describe{
-#'   \item{X_*}{Gross Output decomposition terms.}
-#'   \item{VA_*}{Value Added decomposition terms.}
-#'   \item{E_*}{Embodied CO2 Emission terms.}
-#'   \item{X_Total, VA_Total, E_Total}{The sum of the 5 components for verification.}
+#' @return A \code{data.table} with the following columns...
+#' 
+#' @examples
+#' \dontrun{
+#' # Load the built-in toy dataset
+#' data(toy_mrio)
+#' 
+#' # Perform the decomposition for the year 2023
+#' results <- decompose_national_5part(toy_mrio, 2023)
+#' 
+#' # Inspect results for the "Manufacturing" sector
+#' library(data.table)
+#' print(results[sector == "Manufacturing"])
 #' }
-#'
-#' @references
-#' Zhang, Z., Zhu, K., & Hewings, G. J. D. (2017). "A multi-regional input–output analysis 
-#' of the pollution haven hypothesis..." \emph{Energy Economics}, 64, 13-23.
 #'
 #' @import data.table
 #' @import Matrix
