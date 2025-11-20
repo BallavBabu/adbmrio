@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![R](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue.svg)](https://www.r-project.org/)
 
-## 📖 Overview
+## Overview
 The **`adbmrio`** package is an R toolbox for Global Value Chain (GVC) analysis using the **Asian Development Bank (ADB) Multi-Regional Input-Output (MRIO)** tables. It implements decomposition methods that move directly from ADB MRIO data to bilateral and national indicators of production sharing, embodied CO₂, and value-added flows across countries and sectors.
 
 This package implements a **Two-Track Approach**:
@@ -27,7 +27,7 @@ This package implements a **Two-Track Approach**:
 
 ---
 
-## 📚 Methodological Framework
+## Methodological Framework
 This package implements decomposition methodologies grounded in the following theoretical frameworks:
 
 ### Primary Literature
@@ -120,7 +120,7 @@ $$EEX_{sr}^Q = \hat{e}_s (L_{ss} Q) \quad \text{and} \quad VAX_{sr}^Q = \hat{v}_
 
 ---
 
-## 📊 Data Source & Structure
+## Data Source & Structure
 
 ### ADB MRIO Tables
 This package is designed to process the **Asian Development Bank (ADB) Multi-Regional Input-Output (MRIO) Tables** and **Environmentally Extended MRIO Tables (EE-MRIOTs)**.
@@ -168,7 +168,7 @@ The ADB MRIO includes 63 economies with the following country codes:
 
 ---
 
-## 📥 Data Access & Download
+## Data Access & Download
 
 To facilitate immediate research use, a pre-harmonized **Master Panel Dataset** combining historical ADB MRIO tables with environmentally extended tables is provided.
 
@@ -182,11 +182,15 @@ To facilitate immediate research use, a pre-harmonized **Master Panel Dataset** 
 | Emission Data   | Real data for 2017–2023; Zero placeholders for 2000–2016 to ensure compatibility                     |
 | File Format     | R Data Serialization (.rds), compressed                                                               |
 
-📥 **Download Link**: [Pre-processed MRIO Panel via Zenodo](https://zenodo.org/records/17648887)
+**Download Link**: [Pre-processed MRIO Panel via Zenodo](https://zenodo.org/records/17648887)
 
+**Data Citation:**
+```
+BHUSAL, L. B. (2025). ADB MRIO Panel Data (2000-2023) for adbmrio R Package (1.0.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.17648887
+```
 ---
 
-### 🗂 Dataset Structure & Variable Definitions
+### Dataset Structure & Variable Definitions
 
 The `ADB_MRIO_Merged_Panel_2000_2023.rds` file contains a large list object named `mrio_panel`. The data is organized hierarchically by year. Below is a summary of key variables available for each year.
 
@@ -217,7 +221,7 @@ A complete list of objects in `mrio_panel[[year]]` is provided in the package he
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ```r
 # Install devtools if not already installed
@@ -234,7 +238,7 @@ devtools::install_github("BallavBabu/adbmrio")
 
 ---
 
-## 📖 Usage Examples
+## Usage Examples
 
 ### 1. Basic National Decomposition
 
@@ -299,7 +303,7 @@ print(top_polluters[, .(country, sector, Export_CO2)])
 
 ---
 
-## 🛠 Advanced Usage: Flexible Inputs & Filtering
+## Advanced Usage: Flexible Inputs & Filtering
 
 The package includes intelligent helpers (`resolve_country`) allowing you to use Country Codes, Numeric Indices, or a mix of both.
 
@@ -419,7 +423,7 @@ print(paste("Direct flow from AUS Mining to PRC Basic Metals:", round(val, 2)))
 
 ---
 
-## 📋 Planned Updates
+## Planned Updates
 
 Planned enhancements include:
 
@@ -432,12 +436,12 @@ Planned enhancements include:
 
 ---
 
-## 📄 License
+## License
 This package is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 Contributions, bug reports, and feature requests are welcome! Please feel free to:
 - Open an issue on GitHub
 - Submit a pull request
@@ -445,7 +449,7 @@ Contributions, bug reports, and feature requests are welcome! Please feel free t
 
 ---
 
-## 📧 Contact & Citation
+## Contact & Citation
 
 **Package Maintainer**: Lila Ballav Bhusal  
 **GitHub**: [BallavBabu/adbmrio](https://github.com/BallavBabu/adbmrio)
@@ -459,7 +463,7 @@ R package version 0.1.0. https://github.com/BallavBabu/adbmrio
 
 ---
 
-## 📚 References
+## References
 
 Zhang, Z., Zhu, K., & Hewings, G. J. D. (2017). A multi-regional input–output analysis of the pollution haven hypothesis from the perspective of global production fragmentation. *Energy Economics*, 64, 13-23. https://doi.org/10.1016/j.eneco.2017.03.007
 
@@ -471,5 +475,5 @@ Asian Development Bank. (2024). *Multi-Regional Input-Output Tables*. Available 
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 This package is an independent research tool and is not officially affiliated with or endorsed by the Asian Development Bank (ADB). Users are responsible for ensuring compliance with ADB's data usage terms and conditions.
