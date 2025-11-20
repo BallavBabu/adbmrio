@@ -59,4 +59,5 @@ resolve_country <- function(mrio_panel, input) {
   } else {
     stop("Country identifier must be numeric index or character code.")
   }
+  
 }
