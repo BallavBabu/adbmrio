@@ -2,12 +2,30 @@ Package: adbmrio
 Type: Package
 Title: ADB MRIO Analysis for Global Value Chain Decomposition
 Version: 0.1.0
-Authors@R: person("Bhusal", "Lila Ballav", email = "krish.bhula@gmail.com", role = c("aut", "cre"))
-Description: Bilateral and national trade decomposition using ADB Multi-Regional Input-Output tables.
-   Framework with embodied CO2 emissions and value-added,
-    covering 63 countries and 35 sectors across available years.
+Authors@R: person("Bhusal", "Lila Ballav",
+    email = "krish.bhula@gmail.com",
+    role = c("aut", "cre"))
+Description: An open-source toolkit designed to advance empirical research in 
+    Global Value Chains (GVCs) and trade-environment linkages using Asian 
+    Development Bank Multi-Regional Input-Output (ADB MRIO) tables. Implements 
+    advanced decomposition frameworks—building on Zhang et al. (2017) and the 
+    Wang-Wei-Zhu methodology—to quantify domestic vs. foreign value-added, 
+    double-counting terms, and embodied CO2 emissions. Supports analysis across 
+    63 economies and 35 sectors (2000–2023). Features a two-track workflow: 
+    (1) Rapid 5-part national decomposition, and (2) Detailed bilateral trade 
+    accounting. Includes utilities for seamless integration with pre-processed 
+    panel data.
+URL: https://github.com/BallavBabu/adbmrio, https://zenodo.org/records/17648887
 License: MIT
 Encoding: UTF-8
-Depends: R (>= 4.0.0)
-Imports: Matrix, data.table
-Suggests: openxlsx
+LazyData: true
+RoxygenNote: 7.3.3
+Depends: 
+    R (>= 4.0.0)
+Imports: 
+    Matrix,
+    data.table
+Suggests: 
+    openxlsx,
+    devtools
+
