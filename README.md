@@ -238,6 +238,207 @@ devtools::install_github("BallavBabu/adbmrio")
 
 ---
 
+## 🚀 Quick Start: Try It Immediately
+
+You can test the package functions right now using the bundled `toy_mrio` dataset (a simplified 4-country, 3-sector model included in the package). No external download is required.
+
+```r
+library(adbmrio)
+
+# 1. Load the built-in toy dataset
+data(toy_mrio)
+
+# 2. Run National Decomposition (Zhang et al.)
+# Decomposes Output into Dom_Fin, Dom_Int, Exp_Fin, Exp_Int, Exp_GVC
+macro_res <- decompose_national_5part(toy_mrio, year = 2023)
+print(head(macro_res))
+
+# 3. Run Bilateral Decomposition (WWZ)
+# Analyze Value Added trade from China (Index 1) to India (Index 2)
+micro_res <- compute_bilateral_wwz(toy_mrio, year = 2023, s_idx = 1, r_idx = 2)
+print(micro_res)
+```
+
+---
+
+## 📖 Full Analysis Workflow (Real Data)
+
+### 1. Basic National Decomposition
+
+Calculate the 5-part decomposition for all sectors and countries. This returns Output ($X$), Emissions ($E$), and Value-Added ($VA$) columns.
+
+```r
+library(adbmrio)
+library(data.table)
+
+# Load data
+mrio <- load_adb_mrio("path/to/ADB_MRIO_Merged_Panel_2000_2023.rds")
+
+# Run 5-Part Decomposition for 2021
+# This returns data for ALL 63 countries and 35 sectors
+results <- decompose_national_5part(mrio, year = 2021)
+
+# View China's (PRC) Electronics output breakdown
+china_elec <- results[country == "PRC" & sector %like% "Electrical"]
+print(china_elec[, .(sector, X_Dom_Fin, X_Exp_GVC, X_Total)])
+```
+
+---
+
+### 2. Bilateral Trade Analysis (WWZ)
+
+Analyze the Value-Added content of trade between China (PRC) and USA.
+
+*Note: Track B currently calculates DVA terms only.*
+
+```r
+# Indices: PRC=8, USA=43 (Check mrio$metadata$countries for your specific indices)
+bilateral <- compute_bilateral_wwz(mrio, year = 2021, s_idx = 8, r_idx = 43)
+
+# Summarize Domestic Value Added (DVA) flows by category
+summary <- bilateral[, .(
+  DVA_Final_Goods   = sum(DVA_Fin),
+  DVA_Intermediates = sum(DVA_Int),
+  DVA_GVC_ReExports = sum(DVA_GVC1)
+)]
+print(summary)
+```
+
+*This output can be directly used to report DVA, FVA, and GVC-related components of PRC–USA exports in an empirical paper.*
+
+---
+
+### 3. Environmental Footprint (Track A)
+
+Identify the sectors exporting the most embodied CO₂ using the National Decomposition.
+
+```r
+# National results include emissions columns starting with 'E_'
+results <- decompose_national_5part(mrio, year = 2021)
+
+# Calculate Total Embodied Carbon in Exports (Final + Int + GVC)
+results[, Export_CO2 := E_Exp_Fin + E_Exp_Int + E_Exp_GVC]
+
+# Top 5 Global Sectors by Exported Emissions
+top_polluters <- results[order(-Export_CO2)][1:5]
+print(top_polluters[, .(country, sector, Export_CO2)])
+```
+
+---
+
+## 🛠 Advanced Usage: Flexible Inputs & Filtering
+
+The package includes intelligent helpers (`resolve_country`) allowing you to use Country Codes, Numeric Indices, or a mix of both.
+
+### Flexible Country Selection
+
+You don't need to memorize numeric indices. You can use ISO-like codes (e.g., "PRC", "USA", "IND") directly in functions.
+
+```r
+# Option A: Using Character Codes (Recommended)
+res_codes <- compute_bilateral_wwz(mrio, 2021, s_idx = "PRC", r_idx = "USA")
+
+# Option B: Using Numeric Indices (PRC=8, USA=43)
+res_nums  <- compute_bilateral_wwz(mrio, 2021, s_idx = 8, r_idx = 43)
+
+# Option C: Mixing Types (e.g., Code for Exporter, Index for Importer)
+res_mixed <- compute_bilateral_wwz(mrio, 2021, s_idx = "PRC", r_idx = 43)
+
+# Verify results are identical
+print(identical(res_codes, res_mixed)) # TRUE
+```
+
+---
+
+### Matrix Extraction by Name
+
+Similarly, extract specific $Z$ matrices using country codes.
+
+```r
+# Extract intermediate flows from Japan (JPN) to Korea (KOR)
+z_matrix <- get_sector_to_sector_matrix(mrio, year = 2019, 
+                                        exporter = "JPN", 
+                                        importer = "KOR")
+dim(z_matrix) # Returns 35x35 matrix
+```
+
+---
+
+### Filtering Sectors (Name vs. Number)
+
+Results can be filtered by full sector names or by ADB sector index (1-35).
+
+```r
+# Get results for India
+ind_res <- decompose_national_5part(mrio, 2021)[country == "IND"]
+
+# Method A: Filter by Name (using data.table's %like%)
+textiles <- ind_res[sector %like% "Textiles"]
+
+# Method B: Filter by Sector Number (1-35)
+# Add an ID column to map 1:35 to the rows
+ind_res[, Sector_ID := 1:.N] 
+food_sector <- ind_res[Sector_ID == 3] # Sector 3 is Food & Bev
+
+print(food_sector[, .(Sector_ID, sector, X_Total)])
+```
+
+---
+
+### 4. Data Validation & Gross Exports
+
+The package includes tools to verify the Leontief identity ($X = BY$) and calculate baseline gross exports before performing complex decompositions.
+
+#### A. Check Leontief Inverse Consistency
+
+Verify that the calculated output matches observed output to ensure data integrity.
+
+```r
+# Calculate Global Gross Output using the Leontief Inverse (B)
+# Checks the identity: X_calculated = B * Y
+identity_check  1e-4]
+print(outliers)
+```
+
+#### B. Calculate Total Gross Exports
+
+Compute total exports ($EX_{sr} = A_{sr}X_r + Y_{sr}$) for every country-sector to the rest of the world.
+
+```r
+# Calculate Total Gross Exports (Eq. 5)
+gross_exports <- calculate_total_exports_eq5(mrio, year = 2021)
+
+# Compare Top Exporting Sectors in Vietnam (VNM)
+vnm_exports <- gross_exports[country == "VNM"][order(-total_exports_eq5)]
+print(vnm_exports[1:5, .(sector, total_exports_eq5)])
+```
+
+---
+
+### 5. Supply Chain Inspection (Matrix Extraction)
+
+For granular analysis, you can extract the specific $N \times N$ input-output matrix ($Z$) between two economies to analyze direct technical flows.
+
+```r
+# Scenario: Analyze how much Australian (AUS) inputs go into Chinese (PRC) production
+
+# Extract the 35x35 transaction matrix from AUS -> PRC
+# Uses flexible country codes
+z_aus_prc <- get_sector_to_sector_matrix(mrio, year = 2021, 
+                                         exporter = "AUS", 
+                                         importer = "PRC")
+
+# The matrix rows are Exporter Sectors (AUS); Columns are Importer Sectors (PRC)
+# Example: How much 'Mining and Quarrying' from AUS is used by 'Basic Metals' in PRC?
+
+# Note: Row/Col names format is "Country_Sector"
+val <- z_aus_prc["AUS_Mining and Quarrying", "PRC_Basic Metals"]
+
+print(paste("Direct flow from AUS Mining to PRC Basic Metals:", round(val, 2)))
+```
+
+---
+
 ## Usage Examples
 
 ### 1. Basic National Decomposition
