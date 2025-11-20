@@ -42,6 +42,8 @@ Track A follows the production extension ideas in Zhang et al. (2017) for nation
 
 **Notation**: In this documentation, $B$ denotes the global Leontief inverse and $L_{ss}$ its domestic block for country $s$.
 
+**Detailed Methodology**: For complete mathematical derivations, proofs, and extended examples, see the [Methodology Vignette](http://127.0.0.1:16884/library/adbmrio/doc/methodology.html).
+
 ---
 
 ### Track A: National 5-Part Decomposition (Macro-Level Analysis)
