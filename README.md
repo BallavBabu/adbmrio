@@ -240,7 +240,7 @@ devtools::install_github("BallavBabu/adbmrio")
 
 ---
 
-## 🚀 Quick Start: Try It Immediately
+## Quick Start: Try It Immediately
 
 You can test the package functions right now using the bundled `toy_mrio` dataset (a simplified 4-country, 3-sector model included in the package). No external download is required.
 
