@@ -2,23 +2,28 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![R](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue.svg)](https://www.r-project.org/)
 
-## Overview
-The **`adbmrio`** package provides a comprehensive computational framework for analyzing Global Value Chains (GVCs) using the **Asian Development Bank (ADB) Multi-Regional Input-Output (MRIO)** tables. This package implements structural decomposition algorithms to quantify the intricate networks of international production sharing, embodied environmental impacts, and value-added flows across countries and sectors.
+## 📖 Overview
+The **`adbmrio`** package is an R toolbox for Global Value Chain (GVC) analysis using the **Asian Development Bank (ADB) Multi-Regional Input-Output (MRIO)** tables. It implements decomposition methods that move directly from ADB MRIO data to bilateral and national indicators of production sharing, embodied CO₂, and value-added flows across countries and sectors.
+
+This package implements a **Two-Track Approach**:
+
+1. **Track A (Macro)**: National 5-part decomposition of Gross Output, Value-Added, and CO₂ emissions for each country and sector.
+2. **Track B (Micro)**: Bilateral export decomposition based on the Wang–Wei–Zhu (WWZ) framework, including DVA, FVA, and GVC-related terms.
 
 ### Key Features
-- **Bilateral Export Decomposition**: Decompose gross bilateral exports into domestic value-added, foreign value-added, and double-counting components following the Wang-Wei-Zhu (WWZ) framework.
-- **National Aggregation**: Compute forward linkages and total GVC participation at the country level.
+- **Bilateral Export Decomposition**: Decompose gross bilateral exports into domestic value-added, foreign value-added, and double-counting components following the Wang–Wei–Zhu (WWZ) framework.
+- **National Aggregation**: Compute forward linkages and total GVC participation at the country level (5-Part Model).
 - **Environmental Accounting**: Calculate embodied CO₂ emissions in trade flows.
-- **Value-Added Analysis**: Trace value-added content across global production networks.
-- **Sectoral Granularity**: Analyze GVC participation at the sectoral level (35 sectors).
-- **Matrix Extraction Tools**: Extract raw Input-Output ($Z$) matrices for specific country pairs and custom analysis.
-- **Full-Year Workflow**: Automated computation of all bilateral pairs ($63 \times 62$) with national aggregation.
+- **Value-Added Analysis**: Trace value-added content across global production networks (DVA vs FVA).
+- **Sectoral Granularity**: Full support for 35 sectors across 63 economies.
+- **Matrix Extraction Tools**: Extract raw Input-Output ($Z$) matrices for specific country pairs.
+- **Performance Optimized**: Sparse matrix algebra and block-wise operations for efficient computation.
 
 ### Objectives
-1. **Robust analytical tools** for understanding bilateral trade relationships within global value chains.
-2. **Quantitative metrics** for assessing countries' GVC participation and positioning.
-3. **Environmental footprint calculations** to support climate-informed trade policy analysis.
-4. **Reproducible workflows** for MRIO-based empirical research.
+1. Provide analytical tools for bilateral and national GVC decomposition using ADB MRIO data.
+2. Generate quantitative indicators of GVC participation, positioning, and embodied emissions.
+3. Support climate-related trade studies through embodied CO₂ calculations in exports and imports.
+4. Facilitate reproducible MRIO-based empirical research by standardizing data structures and functions.
 
 ---
 
@@ -33,45 +38,85 @@ This package implements decomposition methodologies grounded in the following th
 - **Wang, Z., Wei, S. J., & Zhu, K. (2013).** "Quantifying International Production Sharing at the Bilateral and Sector Levels." *NBER Working Paper No. 19677*
 - **Wang, Z., Wei, S. J., Yu, X., & Zhu, K. (2018).** "Characterizing Global Value Chains: Production Length and Upstreamness." *NBER Working Paper No. 23261*
 
-### 1. Bilateral Export Decomposition
-Gross bilateral exports from country $s$ to country $r$ ($EX_{sr}$) are decomposed into three major categories based on where and how the goods are absorbed:
+Track A follows the production extension ideas in Zhang et al. (2017) for national decomposition, and Track B follows the bilateral decomposition logic of Wang et al. (2013, 2018).
+
+**Notation**: In this documentation, $B$ denotes the global Leontief inverse and $L_{ss}$ its domestic block for country $s$.
+
+---
+
+### Track A: National 5-Part Decomposition (Macro-Level Analysis)
+
+This decomposition partitions total gross output into domestic final, domestic intermediate, and three export-oriented components, which can be aggregated to national indicators of GVC orientation.
+
+The package decomposes total Gross Output ($X_s$) for every country-sector into five distinct components:
+
+$$X_s = \underbrace{Y_{ss}}_{\substack{\text{1. Domestic} \\ \text{Final}}} + \underbrace{A_{ss}L_{ss}Y_{ss}}_{\substack{\text{2. Domestic} \\ \text{Intermediate}}} + \underbrace{L_{ss}T_f}_{\substack{\text{3. Export} \\ \text{Final}}} + \underbrace{L_{ss}T_i}_{\substack{\text{4. Export} \\ \text{Intermediate}}} + \underbrace{L_{ss}T_g}_{\substack{\text{5. Export} \\ \text{GVC}}}$$
+
+**Where:**
+1. **Domestic Final** ($Y_{ss}$): Goods produced and consumed domestically as final demand.
+2. **Domestic Intermediate** ($A_{ss}L_{ss}Y_{ss}$): Goods produced and consumed domestically as intermediate inputs.
+3. **Export Final** ($L_{ss}T_f$): Domestic value-added embodied in final goods exports.
+4. **Export Intermediate** ($L_{ss}T_i$): Domestic value-added embodied in intermediate exports absorbed by direct importers.
+5. **Export GVC** ($L_{ss}T_g$): Domestic value-added embodied in intermediates that cross borders multiple times (complex GVCs).
+
+**Research Applications:**
+- Measure GVC participation rates at the national level
+- Assess domestic versus export orientation of production
+- Track structural transformation in production networks over time
+- Compare GVC integration across countries and sectors
+
+---
+
+### Track B: Bilateral Export Decomposition (Micro-Level Analysis)
+
+For specific country pairs ($s \rightarrow r$), gross bilateral exports are decomposed into three primary terms based on the Wang-Wei-Zhu (WWZ) framework:
 
 $$EX_{sr} = Y_{sr} + A_{sr}X_r = T_f + T_i + T_g$$
 
-Where:
-- **$T_f$ (Final Goods)**: Direct exports consumed in country *r* as final demand.
+**Where:**
+- **$T_f$ (Final Goods Exports)**: Direct exports consumed in the importing country.
   $$T_f = Y_{sr}$$
-- **$T_i$ (Traditional Intermediates)**: Intermediate inputs absorbed in *r* for domestic production that stays within *r*.
+  
+- **$T_i$ (Traditional Intermediate Exports)**: Intermediate goods absorbed by the importer for domestic production.
   $$T_i = A_{sr} L_{rr} Y_{rr}$$
-- **$T_g$ (GVC-Related Trade)**: Intermediates that cross borders multiple times before final absorption.
-  $$T_g = TG1 + TG2 + TG3$$
+  
+- **$T_g$ (GVC-Related Trade)**: Intermediate exports that are reflected back to the source country or re-exported to third countries (complex cross-border value chains).
+  $$T_g = A_{sr}L_{rr} \sum_{t \neq r} (A_{rt} B_{tr} Y_{rr}) + A_{sr} \sum_{t \neq r} (B_{rt} Y_{tr}) + A_{sr} \sum_{t} B_{rt} \sum_{u \neq r} Y_{tu}$$
 
-### 2. GVC Components ($T_g$ Decomposition)
-The GVC-related trade term captures complex cross-border supply chain linkages:
+### GVC Components ($T_g$ Decomposition)
 
-- **$TG1$ (Feedback Loops)**: Value added that returns to the source country *s* or is absorbed domestically in *r* after crossing borders.
-  $$TG1 = A_{sr} L_{rr} \sum_{t \neq r} (A_{rt} B_{tr} Y_{rr})$$
-- **$TG2$ (Third-Country Final Demand)**: Goods re-exported by *r* to third country *t* for final consumption.
-  $$TG2 = A_{sr} \sum_{t \neq r} (B_{rt} Y_{tr})$$
-- **$TG3$ (Third-Country Intermediate Use)**: Goods re-exported by *r* to *t* for further production, then exported to ultimate destination *u*.
-  $$TG3 = A_{sr} \sum_{t} B_{rt} \sum_{u \neq r} Y_{tu}$$
+The GVC-related trade term ($T_g$) captures complex cross-border supply chain linkages and can be further decomposed into three components:
 
-[Image of global trade network visualization]
+- **$TG1$ (Feedback Loops)**: Value added that returns to the source country $s$ or is absorbed domestically in $r$ after crossing borders.
+- **$TG2$ (Third-Country Final Demand)**: Goods re-exported by $r$ to third country $t$ for final consumption.
+- **$TG3$ (Third-Country Intermediate Use)**: Goods re-exported by $r$ to $t$ for further production, then exported to ultimate destination $u$.
 
-### 3. National Aggregation (Forward Linkages)
-To determine the total GVC participation of country *s*, bilateral flows are aggregated to decompose Total Gross Output ($X_s$):
+*Full algebraic derivations of $TG1$, $TG2$, and $TG3$ are provided in the package vignette.*
 
-$$X_s = \underbrace{L_{ss}Y_{ss}}_{\text{Domestic}} + \underbrace{L_{ss}T_{f*}}_{\text{Final Exp}} + \underbrace{L_{ss}T_{i*}}_{\text{Traditional Int}} + \underbrace{L_{ss}T_{g*}}_{\text{GVC Exp}}$$
+**Research Applications:**
+- Analyze bilateral trade relationships and value chain linkages
+- Identify feedback loops and re-export patterns
+- Quantify third-country participation in bilateral trade
+- Assess bilateral trade imbalances in value-added terms
 
-### 4. Embodied Emissions & Value Added
-The package calculates the environmental and economic footprint embodied in trade flows using the Leontief production extension model. For any export component $Q$ (e.g., $Q = T_f$):
+---
+
+### Embodied Emissions & Value Added
+
+The package calculates the environmental and economic footprint embodied in trade flows using the Leontief production extension model. For any export component $Q$ (e.g., $Q = T_f$, $T_i$, or $T_g$):
 
 $$EEX_{sr}^Q = \hat{e}_s (L_{ss} Q) \quad \text{and} \quad VAX_{sr}^Q = \hat{v}_s (L_{ss} Q)$$
 
-Where:
-- $\hat{e}_s$: Diagonalized vector of direct CO₂ emission intensity coefficients for country *s*.
-- $\hat{v}_s$: Diagonalized vector of direct value-added coefficients for country *s*.
+**Where:**
+- $\hat{e}_s$: Diagonalized vector of direct CO₂ emission intensity coefficients for country $s$.
+- $\hat{v}_s$: Diagonalized vector of direct value-added coefficients for country $s$.
 - $L_{ss}$: Domestic Leontief inverse matrix.
+
+**Research Applications:**
+- Carbon footprint analysis of trade flows
+- Pollution haven hypothesis testing
+- Carbon leakage assessment
+- Value-added accounting in bilateral and multilateral trade
 
 ---
 
@@ -80,10 +125,15 @@ Where:
 ### ADB MRIO Tables
 This package is designed to process the **Asian Development Bank (ADB) Multi-Regional Input-Output (MRIO) Tables** and **Environmentally Extended MRIO Tables (EE-MRIOTs)**.
 
-**Current Data Availability:**
-- **MRIO Tables**: Available for multiple years (pre-2017 to 2023)
-- **CO₂ Emission Data**: Currently available from 2017 to 2023
-- **Future Updates**: Earlier emission data and additional decomposition methods (Koopman, Borin & Mancini frameworks) will be incorporated in future releases
+The panel is built from the ADB MRIO release as of 2024. Users should refer to the ADB MRIO documentation for details on construction and any future updates.
+
+**Coverage:**
+- **Economies**: 63 countries/regions (see `?country_codes`)
+- **Sectors**: 35 ISIC Rev.4 Sectors (see `?sector_codes`)
+- **Years**: 2000 – 2023
+- **CO₂ Emissions**: Available from 2017–2023
+
+**Note**: For 2000–2016, CO₂ variables are zero-filled placeholders included only to keep the panel structure consistent. Emission analysis should be restricted to 2017–2023 unless users load external emission data.
 
 ### Key Dimensions
 - **S** = 63 countries/economies
@@ -120,7 +170,7 @@ The ADB MRIO includes 63 economies with the following country codes:
 
 ## 📥 Data Access & Download
 
-To facilitate immediate research use without requiring manual merging of annual files, a pre-harmonized Master Panel Dataset is provided via public download. This file combines historical ADB MRIO tables with the latest environmentally extended tables into a single, unified panel object.
+To facilitate immediate research use, a pre-harmonized **Master Panel Dataset** combining historical ADB MRIO tables with environmentally extended tables is provided.
 
 ### Dataset: ADB_MRIO_Merged_Panel_2000_2023.rds
 
@@ -132,76 +182,58 @@ To facilitate immediate research use without requiring manual merging of annual 
 | Emission Data   | Real data for 2017–2023; Zero placeholders for 2000–2016 to ensure compatibility                     |
 | File Format     | R Data Serialization (.rds), compressed                                                               |
 
-📥 **[Download Link: Click Here to Download Data via Dropbox]**
+📥 **Download Link**: [Pre-processed MRIO Panel via Zenodo](https://zenodo.org/records/17648887)
 
-*(Note: Please insert the specific shared link to your Dropbox file here)*
+---
 
 ### 🗂 Dataset Structure & Variable Definitions
 
-The `ADB_MRIO_Merged_Panel_2000_2023.rds` file contains a large list object named `mrio_panel`. The data is organized hierarchically by year. Below is the technical specification of the variables available for every year.
+The `ADB_MRIO_Merged_Panel_2000_2023.rds` file contains a large list object named `mrio_panel`. The data is organized hierarchically by year. Below is a summary of key variables available for each year.
 
-#### 1. Dimensions
-Basic metadata defining the size of the global economy matrix.
+#### Core Matrices
+- **Z** (dgCMatrix | 2205 × 2205): Intermediate consumption matrix
+- **X** (numeric | 2205): Total Gross Output vector
+- **Y** (dgCMatrix | 2205 × 315): Final demand matrix
+- **VA_raw** (matrix | 2205 × 1): Total Value Added vector
 
-- **num_countries** (integer | Length: 1): 63 Economies
-- **num_sectors** (numeric | Length: 1): 35 Sectors
-- **total_sectors** (numeric | Length: 1): 2205 ($GN$)
+#### Coefficients
+- **A** (dgCMatrix | 2205 × 2205): Technical Coefficient Matrix ($Z \cdot \hat{x}^{-1}$)
+- **B** (dgCMatrix | 2205 × 2205): Global Leontief Inverse Matrix $(I - A)^{-1}$
+- **A_D / A_F** (dgCMatrix): Domestic vs. Foreign input coefficients
+- **B_D / B_F** (dgCMatrix): Local vs. Foreign Leontief blocks
+- **VA_coeff** (numeric | 2205): Value-added intensity coefficients
+- **VA_diag** (ddiMatrix | 2205 × 2205): Diagonalized value-added matrix
 
-#### 2. Core Matrices (The Economy)
-The fundamental input-output identities.
+#### Block Matrices (Country-Level Subsets)
+- **L_blocks** (list): Domestic Leontief inverse matrices ($L_{ss}$) for all 63 countries
+- **A_blocks** (list): Domestic technical coefficient matrices ($A_{ss}$) for all countries
 
-- **Z** (dgCMatrix | Size: 2205 x 2205): Intermediate consumption matrix (Flows from Sector $i$ to Sector $j$).
-- **X** (numeric | Size: 2205): Total Gross Output vector.
-- **Y** (dgCMatrix | Size: 2205 x 315): Final demand matrix ($63 \text{ countries} \times 5 \text{ categories}$).
-- **VA_raw** (matrix | Size: 2205 x 1): Total Value Added vector.
+#### Environmental Accounts
+- **CO2_raw** (dgCMatrix | 2205 × 1): Total CO₂ emissions by sector (sparse)
+- **CO2_coeff** (dgCMatrix | 2205 × 1): Emission intensities (sparse)
+- **CO2_diag** (ddiMatrix | 2205 × 2205): Diagonalized emission matrix
 
-#### 3. Coefficients
-Calculated indicators for decomposition analysis.
-
-- **A** (dgCMatrix | Size: 2205 x 2205): Technical Coefficient Matrix ($Z \cdot \hat{x}^{-1}$).
-- **B** (dgCMatrix | Size: 2205 x 2205): Global Leontief Inverse Matrix $(I - A)^{-1}$.
-- **A_D / A_F** (dgCMatrix): Domestic vs. Foreign input coefficients.
-- **B_D / B_F** (dgCMatrix): Local vs. Foreign Leontief blocks.
-- **VA_coeff** (numeric | Size: 2205): Value-added intensity coefficients ($v = VA / X$).
-- **VA_diag** (ddiMatrix | Size: 2205 x 2205): Diagonalized value-added matrix.
-
-#### 4. Multipliers
-Harmonized multiplier matrices for structural analysis.
-
-- **L** (dgCMatrix | Size: 2205 x 2205): Domestic Leontief Inverse (Local production chains).
-- **B** (dgCMatrix | Size: 2205 x 2205): Global Leontief Inverse (Same as in coefficients, repeated for convenience).
-
-#### 5. Final Demand Decompositions
-Aggregated views of final demand for easier analysis.
-
-- **Y_D** (dgCMatrix | Size: 2205 x 315): Domestic Final Demand.
-- **Y_F** (matrix | Size: 2205 x 315): Foreign Final Demand (Exports for direct consumption).
-- **Y_country** (matrix | Size: 2205 x 63): Final demand aggregated by absorbing country.
-- **Y_R, Y_D_R, Y_F_R** (numeric | Size: 2205): Row-summed final demand vectors.
-
-#### 6. Trade & Verification
-
-- **E_s** (numeric | Size: 2205): Total Gross Exports by sector.
-- **verification**: Contains logic checks (LY_identity, output_identity) to ensure matrix integrity.
-
-#### 7. Environmental Accounts (Emissions)
-*Note: For years 2000–2016, these are zero-filled matrices.*
-
-- **CO2_raw** (dgCMatrix | Size: 2205 x 1): Total CO₂ emissions by sector.
-- **CO2_coeff** (dgCMatrix | Size: 2205 x 1): Emission intensities ($e = CO2 / X$).
-- **CO2_diag** (ddiMatrix | Size: 2205 x 2205): Diagonalized emission matrix.
+A complete list of objects in `mrio_panel[[year]]` is provided in the package help (`?mrio_panel_structure`) and vignette.
 
 ---
 
 ## 🚀 Installation
-You can install the development version of `adbmrio` directly from GitHub:
+
+### Step 1: Install Package from GitHub
 ```r
 # Install devtools if not already installed
-# install.packages("devtools")
+if (!require("devtools")) install.packages("devtools")
 
 # Install adbmrio from GitHub
 devtools::install_github("BallavBabu/adbmrio")
 ```
+
+### Step 2: Download ADB MRIO Data
+Download the pre-processed MRIO panel dataset from Zenodo:
+
+📥 **[Download ADB MRIO Panel (2000-2023)](https://zenodo.org/records/17648887)**
+
+Save the `.rds` file to your local directory and note the file path for use in the examples below.
 
 ### Dependencies
 The package requires the following R packages:
@@ -213,92 +245,217 @@ The package requires the following R packages:
 
 ## 📖 Usage Examples
 
-### 1. Automated Full-Year Analysis (Recommended)
-The most efficient way to use the package is to run the full workflow, which calculates all bilateral pairs and aggregates them to national totals.
+Below is a comprehensive example script demonstrating the core functionalities of the `adbmrio` package. This script covers:
+1. Loading Data
+2. Track A: National & Sectoral Decomposition (5-Part Model)
+3. Track B: Bilateral Trade Analysis (WWZ Framework)
+4. Environmental Analysis (CO₂ Emissions)
+5. Time-Series Analysis
+
+### Complete Example Script
+
+```r
+# ==============================================================================
+# adbmrio: COMPREHENSIVE EXAMPLE SCRIPT
+# ==============================================================================
+# This script demonstrates the core functionalities of the 'adbmrio' package:
+# 1. Loading Data
+# 2. Track A: National & Sectoral Decomposition (5-Part Model)
+# 3. Track B: Bilateral Trade Analysis (WWZ Framework)
+# 4. Environmental Analysis (CO2 Emissions)
+# 5. Time-Series Analysis
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 0. SETUP & DATA LOADING
+# ------------------------------------------------------------------------------
+library(adbmrio)
+library(data.table)
+
+# Define path to your local MRIO .rds file
+# NOTE: Users should adjust this path to their own data location
+mrio_path <- "path/to/ADB_MRIO_Merged_Panel_2000_2023.rds"
+
+cat("Loading ADB MRIO Panel Data...\n")
+mrio_data <- load_adb_mrio(mrio_path)
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 1: SECTOR-LEVEL DECOMPOSITION (TRACK A)
+# Goal: Analyze GVC participation for specific sectors in a specific year.
+# ------------------------------------------------------------------------------
+target_year <- 2021
+
+cat(paste0("\n--- Running 5-Part Decomposition for ", target_year, " ---\n"))
+
+# This function calculates the 5 terms for ALL sectors in ALL countries
+national_results <- decompose_national_5part(mrio_data, year = target_year)
+
+# Filter: Analyze China's (PRC) Electronics Sector
+# We look for sectors containing "Electrical"
+china_electronics <- national_results[country == "PRC" & sector %like% "Electrical"]
+
+cat("\n[Sector Analysis] PRC Electronics Breakdown:\n")
+print(china_electronics[, .(sector, X_Dom_Fin, X_Dom_Int, X_Exp_GVC, X_Total)])
+
+# Calculate 'GVC Participation Rate' (GVC Exports / Total Output)
+china_electronics[, GVC_Rate := (X_Exp_GVC / X_Total) * 100]
+cat(paste0("GVC Participation Rate: ", round(china_electronics$GVC_Rate, 2), "%\n"))
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 2: COUNTRY-LEVEL AGGREGATION
+# Goal: Aggregate sector data to see macroeconomic trends (GDP/Export shares).
+# ------------------------------------------------------------------------------
+cat("\n--- Aggregating to Country Level ---\n")
+
+country_summary <- national_results[, .(
+  # Summing Gross Output components
+  Total_Output  = sum(X_Total),
+  Total_Exports = sum(X_Exp_Fin + X_Exp_Int + X_Exp_GVC),
+  GVC_Exports   = sum(X_Exp_GVC),
+  
+  # Summing Value Added (GDP contribution)
+  Total_VA      = sum(VA_Total)
+), by = country]
+
+# Compare Major Economies
+target_economies <- c("PRC", "USA", "IND", "JPN", "GER")
+comparison <- country_summary[country %in% target_economies]
+
+# Calculate Export dependence
+comparison[, Export_Share_of_Output := (Total_Exports / Total_Output) * 100]
+
+print(comparison[, .(country, Total_Output, Total_Exports, Export_Share_of_Output)])
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 3: BILATERAL TRADE ANALYSIS (TRACK B)
+# Goal: Analyze the detailed trade relationship between two countries (WWZ).
+# ------------------------------------------------------------------------------
+# Indices: PRC = 8, USA = 43 (Check mrio_data$metadata$countries for indices)
+exporter_idx <- 8   # PRC
+importer_idx <- 43  # USA
+
+cat(paste0("\n--- Running Bilateral WWZ: PRC (", exporter_idx, ") -> USA (", 
+           importer_idx, ") ---\n"))
+
+bilateral_res <- compute_bilateral_wwz(mrio_data, year = 2021, 
+                                       s_idx = exporter_idx, 
+                                       r_idx = importer_idx)
+
+# Show top 5 sectors by "Domestic Value Added in Intermediate Exports" (DVA_Int)
+top_sectors <- bilateral_res[order(-DVA_Int)][1:5]
+
+cat("Top 5 Sectors sending Intermediate Value-Added to USA:\n")
+print(top_sectors[, .(sector, DVA_Int, DVA_Fin, DVA_GVC1)])
+
+# Note: This output can be directly used to report DVA, FVA, and GVC-related 
+# components of PRC–USA exports in an empirical paper.
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 4: ENVIRONMENTAL LINKAGES (CO2)
+# Goal: Identify which sectors export the most Embodied Carbon.
+# ------------------------------------------------------------------------------
+cat("\n--- Environmental Analysis: Embodied Carbon in Exports ---\n")
+
+# Filter for India (IND)
+india_res <- national_results[country == "IND"]
+
+# Calculate Total Embodied Carbon in Exports
+india_res[, Export_CO2 := E_Exp_Fin + E_Exp_Int + E_Exp_GVC]
+
+# Sort by dirtiest export sectors
+top_polluters <- india_res[order(-Export_CO2)][1:5]
+
+cat("Top 5 Indian Sectors by Embodied CO2 in Exports:\n")
+print(top_polluters[, .(sector, Export_CO2, E_Total)])
+
+# ------------------------------------------------------------------------------
+# EXAMPLE 5: TIME-SERIES LOOP
+# Goal: Track the evolution of Global GVC Volume over time.
+# ------------------------------------------------------------------------------
+cat("\n--- Running Time-Series Analysis (2017-2021) ---\n")
+
+years <- 2017:2021
+history_list <- list()
+
+for (y in years) {
+  # Run decomposition silently
+  res <- decompose_national_5part(mrio_data, y)
+  
+  # Calculate Global GVC Volume (Sum of X_Exp_GVC across all countries)
+  global_gvc_vol <- sum(res$X_Exp_GVC)
+  
+  history_list[[as.character(y)]] <- data.table(Year = y, 
+                                                 Global_GVC_Volume = global_gvc_vol)
+}
+
+history_dt <- rbindlist(history_list)
+print(history_dt)
+
+cat("\nDone.\n")
+```
+
+### Quick Start Examples
+
+#### Example 1: Basic National Decomposition
 ```r
 library(adbmrio)
 library(data.table)
 
-# Step 1: Load ADB MRIO Data
-# IMPORTANT: Replace with the actual path to your ADB MRIO RDS file
-file_path <- "~/data/ADB_MRIO_Panel_2017_2023_with_CO2.rds"
-mrio <- load_adb_mrio(file_path)
+# Load data
+mrio <- load_adb_mrio("path/to/ADB_MRIO_Merged_Panel_2000_2023.rds")
 
-# Step 2: Run Full Analysis for 2020
-# Calculates all 63×62 bilateral pairs and aggregates national totals
-results_2020 <- calculate_full_year_gvc(
-  mrio_panel = mrio,
-  year = 2020
-)
+# Run 5-Part Decomposition for 2021
+results <- decompose_national_5part(mrio, year = 2021)
 
-# Step 3: View National GVC Participation
-# Results contain both bilateral and national aggregates
-print(results_2020$national_totals)
-
-# View specific country's forward linkages (e.g., China, index 8)
-china_fwd <- results_2020$national_totals[s_index == 8]
-print(china_fwd)
+# View China's results
+china_results <- results[country == "PRC"]
+print(china_results[, .(sector, X_Total, X_Exp_GVC, VA_Total)])
 ```
 
-### 2. Granular Bilateral Decomposition
-For analyzing specific trade relationships (e.g., China exporting to USA).
+#### Example 2: Bilateral Trade Analysis
 ```r
-# Decompose exports from China (PRC, index 8) to USA (index 43)
-result_bilateral <- compute_bilateral(
-  mrio_panel = mrio,
-  year = 2020,
-  exporter = 8,   # PRC
-  importer = 43   # USA
-)
+# Analyze China → USA trade
+bilateral <- compute_bilateral_wwz(mrio, year = 2021, s_idx = 8, r_idx = 43)
 
-# Aggregate Results by Trade Component
-# Sum across all 35 sectors to get aggregate bilateral flows
-summary <- result_bilateral[, .(
+# Summarize by trade component
+summary <- bilateral[, .(
   Total_Exports = sum(EX_direct),
   Final_Goods = sum(Tf),
   Traditional_Intermediates = sum(Ti),
-  GVC_Related = sum(Tg),
-  Embodied_CO2 = sum(EEX_direct),
-  Embodied_Value_Added = sum(VAX_direct),
-  Max_Accounting_Diff = max(abs(EX_diff))
+  GVC_Related = sum(Tg)
 )]
 print(summary)
-
-# View sector-level details
-print(result_bilateral[, .(sector, EX_direct, Tf, Ti, Tg)])
 ```
 
-### 3. Input-Output Matrix Extraction
-Extract the raw intermediate flow matrix ($Z$) between two countries for custom analysis.
+#### Example 3: Environmental Footprint
 ```r
-# Extract 35×35 sectoral flow matrix: 
-# PRC Sectors (Rows) → USA Sectors (Columns)
-io_matrix <- get_sector_to_sector_matrix(
-  mrio_panel = mrio,
-  year = 2020,
-  exporter = 8,   # PRC
-  importer = 43   # USA
-)
+# Get national results with emissions
+results <- decompose_national_5part(mrio, year = 2021)
 
-# View first 5×5 block
-print(io_matrix[1:5, 1:5])
+# Calculate carbon intensity of exports
+results[, Carbon_Intensity := (E_Exp_Fin + E_Exp_Int + E_Exp_GVC) / 
+                                (X_Exp_Fin + X_Exp_Int + X_Exp_GVC)]
 
-# Calculate total intermediate exports from PRC manufacturing to USA services
-manufacturing_to_services <- sum(io_matrix[10:25, 26:35])
-print(manufacturing_to_services)
+# Top 10 countries by export carbon intensity
+top_carbon <- results[, .(
+  Total_Export_CO2 = sum(E_Exp_Fin + E_Exp_Int + E_Exp_GVC)
+), by = country][order(-Total_Export_CO2)][1:10]
+
+print(top_carbon)
 ```
 
 ---
 
 ## 📋 Planned Updates
-The following enhancements are planned for future releases:
 
-1. **Extended Emission Data**: Integration of pre-2017 CO₂ emission datasets (pending ADB data availability)
-2. **Alternative Decomposition Frameworks**:
-   - Koopman, Wang, and Wei (KWW) decomposition
-   - Borin and Mancini (BM) decomposition
-3. **Visualization Tools**: Built-in functions for network diagrams and GVC position plots
-4. **Performance Optimization**: Parallel computation support for large-scale bilateral decomposition
+Planned enhancements include:
+
+1. Integration of pre-2017 CO₂ emission datasets, subject to ADB data availability.
+2. Additional decomposition frameworks such as Koopman–Wang–Wei (KWW) and Borin–Mancini (BM), where compatible with ADB MRIO.
+3. Convenience functions for visualization of GVC position and network structure.
+4. Parallel computation support for large-scale bilateral decomposition workflows.
+
+*Note: This routine is computationally intensive for full-year bilateral calculations. Users may want to subset countries or sectors when exploring new research ideas.*
 
 ---
 
@@ -316,8 +473,9 @@ Contributions, bug reports, and feature requests are welcome! Please feel free t
 ---
 
 ## 📧 Contact & Citation
-**Package Maintainer**: LILA BALLAV BHUSAL  
-**GitHub**: [https://github.com/BallavBabu/adbmrio](https://github.com/BallavBabu/adbmrio)
+
+**Package Maintainer**: Lila Ballav Bhusal  
+**GitHub**: [BallavBabu/adbmrio](https://github.com/BallavBabu/adbmrio)
 
 ### Citation
 If you use this package in your research, please cite:
@@ -329,6 +487,7 @@ R package version 0.1.0. https://github.com/BallavBabu/adbmrio
 ---
 
 ## 📚 References
+
 Zhang, Z., Zhu, K., & Hewings, G. J. D. (2017). A multi-regional input–output analysis of the pollution haven hypothesis from the perspective of global production fragmentation. *Energy Economics*, 64, 13-23. https://doi.org/10.1016/j.eneco.2017.03.007
 
 Wang, Z., Wei, S. J., & Zhu, K. (2013). *Quantifying International Production Sharing at the Bilateral and Sector Levels* (NBER Working Paper No. 19677). National Bureau of Economic Research.
