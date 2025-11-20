@@ -219,7 +219,6 @@ A complete list of objects in `mrio_panel[[year]]` is provided in the package he
 
 ## 🚀 Installation
 
-### Step 1: Install Package from GitHub
 ```r
 # Install devtools if not already installed
 if (!require("devtools")) install.packages("devtools")
@@ -228,15 +227,7 @@ if (!require("devtools")) install.packages("devtools")
 devtools::install_github("BallavBabu/adbmrio")
 ```
 
-### Step 2: Download ADB MRIO Data
-Download the pre-processed MRIO panel dataset from Zenodo:
-
-📥 **[Download ADB MRIO Panel (2000-2023)](https://zenodo.org/records/17648887)**
-
-Save the `.rds` file to your local directory and note the file path for use in the examples below.
-
-### Dependencies
-The package requires the following R packages:
+**Dependencies:**
 - `data.table` (≥ 1.14.0)
 - `Matrix` (≥ 1.5.0)
 - `R` (≥ 4.0.0)
@@ -245,158 +236,10 @@ The package requires the following R packages:
 
 ## 📖 Usage Examples
 
-Below is a comprehensive example script demonstrating the core functionalities of the `adbmrio` package. This script covers:
-1. Loading Data
-2. Track A: National & Sectoral Decomposition (5-Part Model)
-3. Track B: Bilateral Trade Analysis (WWZ Framework)
-4. Environmental Analysis (CO₂ Emissions)
-5. Time-Series Analysis
+### 1. Basic National Decomposition
 
-### Complete Example Script
+Calculate the 5-part decomposition for all sectors and countries. This returns Output ($X$), Emissions ($E$), and Value-Added ($VA$) columns.
 
-```r
-# ==============================================================================
-# adbmrio: COMPREHENSIVE EXAMPLE SCRIPT
-# ==============================================================================
-# This script demonstrates the core functionalities of the 'adbmrio' package:
-# 1. Loading Data
-# 2. Track A: National & Sectoral Decomposition (5-Part Model)
-# 3. Track B: Bilateral Trade Analysis (WWZ Framework)
-# 4. Environmental Analysis (CO2 Emissions)
-# 5. Time-Series Analysis
-# ==============================================================================
-
-# ------------------------------------------------------------------------------
-# 0. SETUP & DATA LOADING
-# ------------------------------------------------------------------------------
-library(adbmrio)
-library(data.table)
-
-# Define path to your local MRIO .rds file
-# NOTE: Users should adjust this path to their own data location
-mrio_path <- "path/to/ADB_MRIO_Merged_Panel_2000_2023.rds"
-
-cat("Loading ADB MRIO Panel Data...\n")
-mrio_data <- load_adb_mrio(mrio_path)
-
-# ------------------------------------------------------------------------------
-# EXAMPLE 1: SECTOR-LEVEL DECOMPOSITION (TRACK A)
-# Goal: Analyze GVC participation for specific sectors in a specific year.
-# ------------------------------------------------------------------------------
-target_year <- 2021
-
-cat(paste0("\n--- Running 5-Part Decomposition for ", target_year, " ---\n"))
-
-# This function calculates the 5 terms for ALL sectors in ALL countries
-national_results <- decompose_national_5part(mrio_data, year = target_year)
-
-# Filter: Analyze China's (PRC) Electronics Sector
-# We look for sectors containing "Electrical"
-china_electronics <- national_results[country == "PRC" & sector %like% "Electrical"]
-
-cat("\n[Sector Analysis] PRC Electronics Breakdown:\n")
-print(china_electronics[, .(sector, X_Dom_Fin, X_Dom_Int, X_Exp_GVC, X_Total)])
-
-# Calculate 'GVC Participation Rate' (GVC Exports / Total Output)
-china_electronics[, GVC_Rate := (X_Exp_GVC / X_Total) * 100]
-cat(paste0("GVC Participation Rate: ", round(china_electronics$GVC_Rate, 2), "%\n"))
-
-# ------------------------------------------------------------------------------
-# EXAMPLE 2: COUNTRY-LEVEL AGGREGATION
-# Goal: Aggregate sector data to see macroeconomic trends (GDP/Export shares).
-# ------------------------------------------------------------------------------
-cat("\n--- Aggregating to Country Level ---\n")
-
-country_summary <- national_results[, .(
-  # Summing Gross Output components
-  Total_Output  = sum(X_Total),
-  Total_Exports = sum(X_Exp_Fin + X_Exp_Int + X_Exp_GVC),
-  GVC_Exports   = sum(X_Exp_GVC),
-  
-  # Summing Value Added (GDP contribution)
-  Total_VA      = sum(VA_Total)
-), by = country]
-
-# Compare Major Economies
-target_economies <- c("PRC", "USA", "IND", "JPN", "GER")
-comparison <- country_summary[country %in% target_economies]
-
-# Calculate Export dependence
-comparison[, Export_Share_of_Output := (Total_Exports / Total_Output) * 100]
-
-print(comparison[, .(country, Total_Output, Total_Exports, Export_Share_of_Output)])
-
-# ------------------------------------------------------------------------------
-# EXAMPLE 3: BILATERAL TRADE ANALYSIS (TRACK B)
-# Goal: Analyze the detailed trade relationship between two countries (WWZ).
-# ------------------------------------------------------------------------------
-# Indices: PRC = 8, USA = 43 (Check mrio_data$metadata$countries for indices)
-exporter_idx <- 8   # PRC
-importer_idx <- 43  # USA
-
-cat(paste0("\n--- Running Bilateral WWZ: PRC (", exporter_idx, ") -> USA (", 
-           importer_idx, ") ---\n"))
-
-bilateral_res <- compute_bilateral_wwz(mrio_data, year = 2021, 
-                                       s_idx = exporter_idx, 
-                                       r_idx = importer_idx)
-
-# Show top 5 sectors by "Domestic Value Added in Intermediate Exports" (DVA_Int)
-top_sectors <- bilateral_res[order(-DVA_Int)][1:5]
-
-cat("Top 5 Sectors sending Intermediate Value-Added to USA:\n")
-print(top_sectors[, .(sector, DVA_Int, DVA_Fin, DVA_GVC1)])
-
-# Note: This output can be directly used to report DVA, FVA, and GVC-related 
-# components of PRC–USA exports in an empirical paper.
-
-# ------------------------------------------------------------------------------
-# EXAMPLE 4: ENVIRONMENTAL LINKAGES (CO2)
-# Goal: Identify which sectors export the most Embodied Carbon.
-# ------------------------------------------------------------------------------
-cat("\n--- Environmental Analysis: Embodied Carbon in Exports ---\n")
-
-# Filter for India (IND)
-india_res <- national_results[country == "IND"]
-
-# Calculate Total Embodied Carbon in Exports
-india_res[, Export_CO2 := E_Exp_Fin + E_Exp_Int + E_Exp_GVC]
-
-# Sort by dirtiest export sectors
-top_polluters <- india_res[order(-Export_CO2)][1:5]
-
-cat("Top 5 Indian Sectors by Embodied CO2 in Exports:\n")
-print(top_polluters[, .(sector, Export_CO2, E_Total)])
-
-# ------------------------------------------------------------------------------
-# EXAMPLE 5: TIME-SERIES LOOP
-# Goal: Track the evolution of Global GVC Volume over time.
-# ------------------------------------------------------------------------------
-cat("\n--- Running Time-Series Analysis (2017-2021) ---\n")
-
-years <- 2017:2021
-history_list <- list()
-
-for (y in years) {
-  # Run decomposition silently
-  res <- decompose_national_5part(mrio_data, y)
-  
-  # Calculate Global GVC Volume (Sum of X_Exp_GVC across all countries)
-  global_gvc_vol <- sum(res$X_Exp_GVC)
-  
-  history_list[[as.character(y)]] <- data.table(Year = y, 
-                                                 Global_GVC_Volume = global_gvc_vol)
-}
-
-history_dt <- rbindlist(history_list)
-print(history_dt)
-
-cat("\nDone.\n")
-```
-
-### Quick Start Examples
-
-#### Example 1: Basic National Decomposition
 ```r
 library(adbmrio)
 library(data.table)
@@ -405,43 +248,173 @@ library(data.table)
 mrio <- load_adb_mrio("path/to/ADB_MRIO_Merged_Panel_2000_2023.rds")
 
 # Run 5-Part Decomposition for 2021
+# This returns data for ALL 63 countries and 35 sectors
 results <- decompose_national_5part(mrio, year = 2021)
 
-# View China's results
-china_results <- results[country == "PRC"]
-print(china_results[, .(sector, X_Total, X_Exp_GVC, VA_Total)])
+# View China's (PRC) Electronics output breakdown
+china_elec <- results[country == "PRC" & sector %like% "Electrical"]
+print(china_elec[, .(sector, X_Dom_Fin, X_Exp_GVC, X_Total)])
 ```
 
-#### Example 2: Bilateral Trade Analysis
+---
+
+### 2. Bilateral Trade Analysis (WWZ)
+
+Analyze the Value-Added content of trade between China (PRC) and USA.
+
+*Note: Track B currently calculates DVA terms only.*
+
 ```r
-# Analyze China → USA trade
+# Indices: PRC=8, USA=43 (Check mrio$metadata$countries for your specific indices)
 bilateral <- compute_bilateral_wwz(mrio, year = 2021, s_idx = 8, r_idx = 43)
 
-# Summarize by trade component
+# Summarize Domestic Value Added (DVA) flows by category
 summary <- bilateral[, .(
-  Total_Exports = sum(EX_direct),
-  Final_Goods = sum(Tf),
-  Traditional_Intermediates = sum(Ti),
-  GVC_Related = sum(Tg)
+  DVA_Final_Goods   = sum(DVA_Fin),
+  DVA_Intermediates = sum(DVA_Int),
+  DVA_GVC_ReExports = sum(DVA_GVC1)
 )]
 print(summary)
 ```
 
-#### Example 3: Environmental Footprint
+*This output can be directly used to report DVA, FVA, and GVC-related components of PRC–USA exports in an empirical paper.*
+
+---
+
+### 3. Environmental Footprint (Track A)
+
+Identify the sectors exporting the most embodied CO₂ using the National Decomposition.
+
 ```r
-# Get national results with emissions
+# National results include emissions columns starting with 'E_'
 results <- decompose_national_5part(mrio, year = 2021)
 
-# Calculate carbon intensity of exports
-results[, Carbon_Intensity := (E_Exp_Fin + E_Exp_Int + E_Exp_GVC) / 
-                                (X_Exp_Fin + X_Exp_Int + X_Exp_GVC)]
+# Calculate Total Embodied Carbon in Exports (Final + Int + GVC)
+results[, Export_CO2 := E_Exp_Fin + E_Exp_Int + E_Exp_GVC]
 
-# Top 10 countries by export carbon intensity
-top_carbon <- results[, .(
-  Total_Export_CO2 = sum(E_Exp_Fin + E_Exp_Int + E_Exp_GVC)
-), by = country][order(-Total_Export_CO2)][1:10]
+# Top 5 Global Sectors by Exported Emissions
+top_polluters <- results[order(-Export_CO2)][1:5]
+print(top_polluters[, .(country, sector, Export_CO2)])
+```
 
-print(top_carbon)
+---
+
+## 🛠 Advanced Usage: Flexible Inputs & Filtering
+
+The package includes intelligent helpers (`resolve_country`) allowing you to use Country Codes, Numeric Indices, or a mix of both.
+
+### Flexible Country Selection
+
+You don't need to memorize numeric indices. You can use ISO-like codes (e.g., "PRC", "USA", "IND") directly in functions.
+
+```r
+# Option A: Using Character Codes (Recommended)
+res_codes <- compute_bilateral_wwz(mrio, 2021, s_idx = "PRC", r_idx = "USA")
+
+# Option B: Using Numeric Indices (PRC=8, USA=43)
+res_nums  <- compute_bilateral_wwz(mrio, 2021, s_idx = 8, r_idx = 43)
+
+# Option C: Mixing Types (e.g., Code for Exporter, Index for Importer)
+res_mixed <- compute_bilateral_wwz(mrio, 2021, s_idx = "PRC", r_idx = 43)
+
+# Verify results are identical
+print(identical(res_codes, res_mixed)) # TRUE
+```
+
+---
+
+### Matrix Extraction by Name
+
+Similarly, extract specific $Z$ matrices using country codes.
+
+```r
+# Extract intermediate flows from Japan (JPN) to Korea (KOR)
+z_matrix <- get_sector_to_sector_matrix(mrio, year = 2019, 
+                                        exporter = "JPN", 
+                                        importer = "KOR")
+dim(z_matrix) # Returns 35x35 matrix
+```
+
+---
+
+### Filtering Sectors (Name vs. Number)
+
+Results can be filtered by full sector names or by ADB sector index (1-35).
+
+```r
+# Get results for India
+ind_res <- decompose_national_5part(mrio, 2021)[country == "IND"]
+
+# Method A: Filter by Name (using data.table's %like%)
+textiles <- ind_res[sector %like% "Textiles"]
+
+# Method B: Filter by Sector Number (1-35)
+# Add an ID column to map 1:35 to the rows
+ind_res[, Sector_ID := 1:.N] 
+food_sector <- ind_res[Sector_ID == 3] # Sector 3 is Food & Bev
+
+print(food_sector[, .(Sector_ID, sector, X_Total)])
+```
+
+---
+
+### 4. Data Validation & Gross Exports
+
+The package includes tools to verify the Leontief identity ($X = BY$) and calculate baseline gross exports before performing complex decompositions.
+
+#### A. Check Leontief Inverse Consistency
+
+Verify that the calculated output matches observed output to ensure data integrity.
+
+```r
+# Calculate Global Gross Output using the Leontief Inverse (B)
+# Checks the identity: X_calculated = B * Y
+identity_check <- calculate_gross_output_identity(mrio, year = 2021)
+
+# View the difference between Calculated and Observed Output
+# Small floating-point differences are expected
+print(summary(identity_check$diff))
+
+# Identify any sectors with significant deviations
+outliers <- identity_check[abs(diff) > 1e-4]
+print(outliers)
+```
+
+#### B. Calculate Total Gross Exports
+
+Compute total exports ($EX_{sr} = A_{sr}X_r + Y_{sr}$) for every country-sector to the rest of the world.
+
+```r
+# Calculate Total Gross Exports (Eq. 5)
+gross_exports <- calculate_total_exports_eq5(mrio, year = 2021)
+
+# Compare Top Exporting Sectors in Vietnam (VNM)
+vnm_exports <- gross_exports[country == "VNM"][order(-total_exports_eq5)]
+print(vnm_exports[1:5, .(sector, total_exports_eq5)])
+```
+
+---
+
+### 5. Supply Chain Inspection (Matrix Extraction)
+
+For granular analysis, you can extract the specific $N \times N$ input-output matrix ($Z$) between two economies to analyze direct technical flows.
+
+```r
+# Scenario: Analyze how much Australian (AUS) inputs go into Chinese (PRC) production
+
+# Extract the 35x35 transaction matrix from AUS -> PRC
+# Uses flexible country codes
+z_aus_prc <- get_sector_to_sector_matrix(mrio, year = 2021, 
+                                         exporter = "AUS", 
+                                         importer = "PRC")
+
+# The matrix rows are Exporter Sectors (AUS); Columns are Importer Sectors (PRC)
+# Example: How much 'Mining and Quarrying' from AUS is used by 'Basic Metals' in PRC?
+
+# Note: Row/Col names format is "Country_Sector"
+val <- z_aus_prc["AUS_Mining and Quarrying", "PRC_Basic Metals"]
+
+print(paste("Direct flow from AUS Mining to PRC Basic Metals:", round(val, 2)))
 ```
 
 ---
@@ -455,7 +428,7 @@ Planned enhancements include:
 3. Convenience functions for visualization of GVC position and network structure.
 4. Parallel computation support for large-scale bilateral decomposition workflows.
 
-*Note: This routine is computationally intensive for full-year bilateral calculations. Users may want to subset countries or sectors when exploring new research ideas.*
+*Note: Full-year bilateral calculations are computationally intensive. Users may want to subset countries or sectors when exploring new research ideas.*
 
 ---
 
