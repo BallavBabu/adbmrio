@@ -15,7 +15,7 @@ Description: An open-source toolkit designed to advance empirical research in
     (1) Rapid 5-part national decomposition, and (2) Detailed bilateral trade 
     accounting. Includes utilities for seamless integration with pre-processed 
     panel data.
-URL: https://github.com/BallavBabu/adbmrio, https://zenodo.org/records/17648887
+URL: https://github.com/BallavBabu/adbmrio, https://zenodo.org/records/17648887, https://ballavbabu.github.io/adbmrio/
 License: MIT
 Encoding: UTF-8
 LazyData: true
