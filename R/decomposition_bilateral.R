@@ -6,13 +6,17 @@
 #'
 #' @param mrio_panel MRIO data object.
 #' @param year Year to analyze.
-#' @param s_idx Exporter index.
-#' @param r_idx Importer index.
+#' @param s_idx Exporter: Numeric Index (e.g. 8) OR Country Code (e.g. "PRC").
+#' @param r_idx Importer: Numeric Index (e.g. 43) OR Country Code (e.g. "USA").
 #' @return Data.table of bilateral terms.
 #' @import data.table
 #' @import Matrix
 #' @export
 compute_bilateral_wwz <- function(mrio_panel, year, s_idx, r_idx) {
+  
+  s_idx <- resolve_country(mrio_panel, s_idx)
+  r_idx <- resolve_country(mrio_panel, r_idx)
+  
   mats <- get_year_objects(mrio_panel, year)
   N <- length(mrio_panel$metadata$sectors)
   S <- length(mrio_panel$metadata$countries)
@@ -35,14 +39,16 @@ compute_bilateral_wwz <- function(mrio_panel, year, s_idx, r_idx) {
     B_tr <- mats$B[rt, rr, drop=FALSE]
     A_rt <- mats$A[rr, rt, drop=FALSE]
     if(length(B_tr@x) > 0 && length(A_rt@x) > 0) {
-      S_TG1_sum <- S_TG1_sum + as.numeric(A_rt %*% (B_tr %*% Y_rr))
+       S_TG1_sum <- S_TG1_sum + as.numeric(A_rt %*% (B_tr %*% Y_rr))
     }
   }
   T_g1 <- as.numeric(A_sr %*% (L_rr %*% S_TG1_sum))
   
   v_s <- mats$VA_coeff[sr]
   data.table(
-    s_index = s_idx, r_index = r_idx, sector = mrio_panel$metadata$sectors,
+    s_index = s_idx, s_country = mrio_panel$metadata$countries[s_idx],
+    r_index = r_idx, r_country = mrio_panel$metadata$countries[r_idx],
+    sector = mrio_panel$metadata$sectors,
     DVA_Fin = v_s * as.numeric(L_ss %*% T_f),
     DVA_Int = v_s * as.numeric(L_ss %*% T_i),
     DVA_GVC1 = v_s * as.numeric(L_ss %*% T_g1)

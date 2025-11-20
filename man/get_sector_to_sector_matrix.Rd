@@ -11,9 +11,9 @@ get_sector_to_sector_matrix(mrio_panel, year, exporter, importer)
 
 \item{year}{Year to analyze.}
 
-\item{exporter}{Exporter index.}
+\item{exporter}{Exporter: Numeric Index (e.g. 8) OR Country Code (e.g. "PRC").}
 
-\item{importer}{Importer index.}
+\item{importer}{Importer: Numeric Index (e.g. 43) OR Country Code (e.g. "USA").}
 }
 \value{
 35x35 Matrix.

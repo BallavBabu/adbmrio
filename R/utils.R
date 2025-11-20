@@ -38,10 +38,25 @@ get_year_objects <- function(mrio_panel, year_label) {
     Y = y$core_matrices$Y,
     A = y$coefficients$A,
     A_D = y$coefficients$A_D,
-    # CRITICAL DEFINITION:
-    B = y$multipliers$B, # Global Leontief Inverse
-    L = y$multipliers$L, # Domestic Leontief Inverse
+    B = y$multipliers$B, 
+    L = y$multipliers$L, 
     VA_coeff = as.numeric(y$coefficients$VA_coeff),
     CO2_coeff = as.numeric(y$emissions$CO2_coeff)
   )
+}
+
+#' @keywords internal
+resolve_country <- function(mrio_panel, input) {
+  if (is.numeric(input)) {
+    idx <- as.integer(input)
+    S <- length(mrio_panel$metadata$countries)
+    if (idx < 1 || idx > S) stop(paste("Country index", idx, "out of bounds."))
+    return(idx)
+  } else if (is.character(input)) {
+    idx <- which(mrio_panel$metadata$countries == input)
+    if (length(idx) == 0) stop(paste("Country code '", input, "' not found."))
+    return(idx)
+  } else {
+    stop("Country identifier must be numeric index or character code.")
+  }
 }

@@ -11,9 +11,9 @@ compute_bilateral_wwz(mrio_panel, year, s_idx, r_idx)
 
 \item{year}{Year to analyze.}
 
-\item{s_idx}{Exporter index.}
+\item{s_idx}{Exporter: Numeric Index (e.g. 8) OR Country Code (e.g. "PRC").}
 
-\item{r_idx}{Importer index.}
+\item{r_idx}{Importer: Numeric Index (e.g. 43) OR Country Code (e.g. "USA").}
 }
 \value{
 Data.table of bilateral terms.
