@@ -1,0 +1,9 @@
+pandoc: 3.6.3
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  methodology: methodology.html
+last_built: 2025-11-20T07:38Z
+urls:
+  reference: https://ballavbabu.github.io/adbmrio/reference
+  article: https://ballavbabu.github.io/adbmrio/articles
