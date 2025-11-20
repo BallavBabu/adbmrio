@@ -15,10 +15,5 @@ decompose_national_5part(mrio_panel, year)
 A data.table with decomposition results by sector.
 }
 \description{
-Decomposes Gross Output, Value Added, and Emissions into 5 parts:
-1. Domestic Final
-2. Domestic Intermediate
-3. Export Final (Embodied)
-4. Export Intermediate (Embodied)
-5. Export GVC (Embodied)
+Decomposes Gross Output, Value Added, and Emissions into 5 parts.
 }
