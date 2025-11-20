@@ -1,13 +1,14 @@
 # R/simple_indicators.R
 
-#' Gross Output Identity Check (X = B * Y)
+#' Gross Output Identity Check (Validation)
 #'
-#' Calculates Global Gross Output using the Global Leontief Inverse (B).
-#' Checks the identity X = B * Y.
+#' Verifies the fundamental Leontief identity \eqn{X = B \times Y}.
+#' This function is primarily used for data validation to ensure the inverse matrix ($B$)
+#' is consistent with the observed output ($X$).
 #'
 #' @param mrio_panel MRIO data object.
 #' @param year Year to analyze.
-#' @return Data.table comparing calculated vs observed Output.
+#' @return A \code{data.table} comparing calculated vs. observed output, including a \code{diff} column.
 #' @import data.table
 #' @import Matrix
 #' @export
@@ -29,14 +30,14 @@ calculate_gross_output_identity <- function(mrio_panel, year) {
   )
 }
 
-#' Calculate Total Bilateral Exports (Equation 5)
+#' Calculate Total Bilateral Gross Exports
 #'
-#' Calculates EX_sr = A_sr * X_r + Y_sr.
-#' Returns the total exports of country s to the world (excluding domestic).
+#' Calculates total gross exports from Country S to the world based on the formula:
+#' \eqn{EX_{sr} = A_{sr}X_r + Y_{sr}}.
 #'
 #' @param mrio_panel MRIO data object.
 #' @param year Year to analyze.
-#' @return Data.table of total exports by sector.
+#' @return A \code{data.table} of total exports by sector.
 #' @import data.table
 #' @import Matrix
 #' @export

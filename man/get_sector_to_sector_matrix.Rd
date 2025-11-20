@@ -2,22 +2,24 @@
 % Please edit documentation in R/matrix_tools.R
 \name{get_sector_to_sector_matrix}
 \alias{get_sector_to_sector_matrix}
-\title{Extract Sector-to-Sector Trade Matrix}
+\title{Extract Sector-to-Sector Trade Matrix (Z)}
 \usage{
 get_sector_to_sector_matrix(mrio_panel, year, exporter, importer)
 }
 \arguments{
-\item{mrio_panel}{MRIO data object.}
+\item{mrio_panel}{The MRIO data object.}
 
-\item{year}{Year to analyze.}
+\item{year}{Integer. The year to analyze.}
 
-\item{exporter}{Exporter: Numeric Index (e.g. 8) OR Country Code (e.g. "PRC").}
+\item{exporter}{Source country. Numeric Index (e.g., 8) OR Country Code (e.g., "PRC").}
 
-\item{importer}{Importer: Numeric Index (e.g. 43) OR Country Code (e.g. "USA").}
+\item{importer}{Destination country. Numeric Index (e.g., 43) OR Country Code (e.g., "USA").}
 }
 \value{
-35x35 Matrix.
+A sparse matrix (35 x 35) with row names formatted as \code{"Country_Sector"}.
+Values represent flows in millions of USD (constant prices).
 }
 \description{
-Returns the N x N matrix of intermediate flows.
+Extracts the specific N x N block of the intermediate transaction matrix ($Z$)
+representing direct flows from the Exporter to the Importer.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/simple_indicators.R
 \name{calculate_gross_output_identity}
 \alias{calculate_gross_output_identity}
-\title{Gross Output Identity Check (X = B * Y)}
+\title{Gross Output Identity Check (Validation)}
 \usage{
 calculate_gross_output_identity(mrio_panel, year)
 }
@@ -12,9 +12,10 @@ calculate_gross_output_identity(mrio_panel, year)
 \item{year}{Year to analyze.}
 }
 \value{
-Data.table comparing calculated vs observed Output.
+A \code{data.table} comparing calculated vs. observed output, including a \code{diff} column.
 }
 \description{
-Calculates Global Gross Output using the Global Leontief Inverse (B).
-Checks the identity X = B * Y.
+Verifies the fundamental Leontief identity \eqn{X = B \times Y}.
+This function is primarily used for data validation to ensure the inverse matrix ($B$)
+is consistent with the observed output ($X$).
 }

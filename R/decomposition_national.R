@@ -1,12 +1,37 @@
 # R/decomposition_national.R
 
-#' 5-Part Decomposition of Gross Output
-#' 
-#' Decomposes Gross Output, Value Added, and Emissions into 5 parts.
+#' National 5-Part GVC Decomposition (Macro Analysis)
 #'
-#' @param mrio_panel MRIO data object.
-#' @param year Year to analyze.
-#' @return A data.table with decomposition results by sector.
+#' Performs a national-level decomposition of Gross Output ($X$), Value Added ($VA$), 
+#' and CO2 Emissions ($E$) into 5 components based on the framework by Zhang et al. (2017).
+#'
+#' @details
+#' The function decomposes total output for every country-sector into:
+#' \itemize{
+#'   \item \strong{Dom_Fin}: Production consumed domestically as final goods.
+#'   \item \strong{Dom_Int}: Production consumed domestically as intermediate goods.
+#'   \item \strong{Exp_Fin}: Exports consumed immediately by the importer (Final Demand).
+#'   \item \strong{Exp_Int}: Intermediate exports absorbed by the direct importer.
+#'   \item \strong{Exp_GVC}: Intermediate exports involved in complex GVCs (re-exports).
+#' }
+#' The function applies a clipping method (\code{pmax(x, 0)}) to handle numerical precision artifacts
+#' common in sparse matrix operations.
+#'
+#' @param mrio_panel The list object loaded via \code{\link{load_adb_mrio}}.
+#' @param year Integer. The specific year to analyze (e.g., 2021).
+#'
+#' @return A \code{data.table} with the following columns for all 63 countries and 35 sectors:
+#' \describe{
+#'   \item{X_*}{Gross Output decomposition terms.}
+#'   \item{VA_*}{Value Added decomposition terms.}
+#'   \item{E_*}{Embodied CO2 Emission terms.}
+#'   \item{X_Total, VA_Total, E_Total}{The sum of the 5 components for verification.}
+#' }
+#'
+#' @references
+#' Zhang, Z., Zhu, K., & Hewings, G. J. D. (2017). "A multi-regional input–output analysis 
+#' of the pollution haven hypothesis..." \emph{Energy Economics}, 64, 13-23.
+#'
 #' @import data.table
 #' @import Matrix
 #' @export
@@ -63,10 +88,10 @@ decompose_national_5part <- function(mrio_panel, year) {
     x1=clip(Term1); x2=clip(Term2); x3=clip(X_Term3); x4=clip(X_Term4); x5=clip(X_Term5)
     e1=clip(e*Term1); e2=clip(e*Term2); e3=clip(e*X_Term3); e4=clip(e*X_Term4); e5=clip(e*X_Term5)
     v1=clip(v*Term1); v2=clip(v*Term2); v3=clip(v*X_Term3); v4=clip(v*X_Term4); v5=clip(v*X_Term5)
-
+    
     results[[s]] <- data.table(
       year = year, 
-      country_index = s, # <--- CRITICAL FIX: Added Index
+      country_index = s,
       country = mrio_panel$metadata$countries[s], 
       sector = mrio_panel$metadata$sectors,
       

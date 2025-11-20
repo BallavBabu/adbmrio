@@ -2,18 +2,41 @@
 % Please edit documentation in R/decomposition_national.R
 \name{decompose_national_5part}
 \alias{decompose_national_5part}
-\title{5-Part Decomposition of Gross Output}
+\title{National 5-Part GVC Decomposition (Macro Analysis)}
 \usage{
 decompose_national_5part(mrio_panel, year)
 }
 \arguments{
-\item{mrio_panel}{MRIO data object.}
+\item{mrio_panel}{The list object loaded via \code{\link{load_adb_mrio}}.}
 
-\item{year}{Year to analyze.}
+\item{year}{Integer. The specific year to analyze (e.g., 2021).}
 }
 \value{
-A data.table with decomposition results by sector.
+A \code{data.table} with the following columns for all 63 countries and 35 sectors:
+\describe{
+  \item{X_*}{Gross Output decomposition terms.}
+  \item{VA_*}{Value Added decomposition terms.}
+  \item{E_*}{Embodied CO2 Emission terms.}
+  \item{X_Total, VA_Total, E_Total}{The sum of the 5 components for verification.}
+}
 }
 \description{
-Decomposes Gross Output, Value Added, and Emissions into 5 parts.
+Performs a national-level decomposition of Gross Output ($X$), Value Added ($VA$), 
+and CO2 Emissions ($E$) into 5 components based on the framework by Zhang et al. (2017).
+}
+\details{
+The function decomposes total output for every country-sector into:
+\itemize{
+  \item \strong{Dom_Fin}: Production consumed domestically as final goods.
+  \item \strong{Dom_Int}: Production consumed domestically as intermediate goods.
+  \item \strong{Exp_Fin}: Exports consumed immediately by the importer (Final Demand).
+  \item \strong{Exp_Int}: Intermediate exports absorbed by the direct importer.
+  \item \strong{Exp_GVC}: Intermediate exports involved in complex GVCs (re-exports).
+}
+The function applies a clipping method (\code{pmax(x, 0)}) to handle numerical precision artifacts
+common in sparse matrix operations.
+}
+\references{
+Zhang, Z., Zhu, K., & Hewings, G. J. D. (2017). "A multi-regional input–output analysis 
+of the pollution haven hypothesis..." \emph{Energy Economics}, 64, 13-23.
 }

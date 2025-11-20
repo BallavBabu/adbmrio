@@ -2,7 +2,7 @@
 % Please edit documentation in R/simple_indicators.R
 \name{calculate_total_exports_eq5}
 \alias{calculate_total_exports_eq5}
-\title{Calculate Total Bilateral Exports (Equation 5)}
+\title{Calculate Total Bilateral Gross Exports}
 \usage{
 calculate_total_exports_eq5(mrio_panel, year)
 }
@@ -12,9 +12,9 @@ calculate_total_exports_eq5(mrio_panel, year)
 \item{year}{Year to analyze.}
 }
 \value{
-Data.table of total exports by sector.
+A \code{data.table} of total exports by sector.
 }
 \description{
-Calculates EX_sr = A_sr * X_r + Y_sr.
-Returns the total exports of country s to the world (excluding domestic).
+Calculates total gross exports from Country S to the world based on the formula:
+\eqn{EX_{sr} = A_{sr}X_r + Y_{sr}}.
 }

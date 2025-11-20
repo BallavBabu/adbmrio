@@ -2,22 +2,32 @@
 % Please edit documentation in R/decomposition_bilateral.R
 \name{compute_bilateral_wwz}
 \alias{compute_bilateral_wwz}
-\title{Detailed Bilateral WWZ Decomposition}
+\title{Detailed Bilateral WWZ Decomposition (Micro Analysis)}
 \usage{
 compute_bilateral_wwz(mrio_panel, year, s_idx, r_idx)
 }
 \arguments{
-\item{mrio_panel}{MRIO data object.}
+\item{mrio_panel}{The list object loaded via \code{\link{load_adb_mrio}}.}
 
-\item{year}{Year to analyze.}
+\item{year}{Integer. Year to analyze.}
 
-\item{s_idx}{Exporter: Numeric Index (e.g. 8) OR Country Code (e.g. "PRC").}
+\item{s_idx}{Exporter identifier. Can be a numeric index (e.g., \code{8}) or character code (e.g., \code{"PRC"}).}
 
-\item{r_idx}{Importer: Numeric Index (e.g. 43) OR Country Code (e.g. "USA").}
+\item{r_idx}{Importer identifier. Can be a numeric index (e.g., \code{43}) or character code (e.g., \code{"USA"}).}
 }
 \value{
-Data.table of bilateral terms.
+A \code{data.table} containing sector-level DVA terms for the specified pair.
 }
 \description{
-Performs bilateral trade decomposition (s -> r) using the WWZ framework.
+Decomposes the \strong{Domestic Value Added (DVA)} content of bilateral exports
+from a source country ($s$) to a reporting country ($r$) using the Wang-Wei-Zhu (WWZ) framework.
+}
+\details{
+Unlike standard gross export data, this function isolates the value originating strictly
+from the source country. It calculates:
+\itemize{
+  \item \strong{DVA_Fin}: DVA embodied in Final Goods exports ($T_f$).
+  \item \strong{DVA_Int}: DVA embodied in Intermediate exports absorbed by the importer ($T_i$).
+  \item \strong{DVA_GVC1}: DVA embodied in re-exported intermediates (GVC trade) ($T_{g1}$).
+}
 }
