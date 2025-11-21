@@ -662,13 +662,13 @@ Contributions, bug reports, and feature requests are welcome! Please feel free t
 
 If you use the `adbmrio` package in your research, please cite it alongside the methodology:
 ```
-> Ballav, B. (2025). adbmrio: Computational Framework for ADB MRIO Global Value Chain Decomposition (Version 1.0.0). Zenodo. https://doi.org/10.5281/zenodo.17648887
+> Bhusal, L.B. (2025). adbmrio: Computational Framework for ADB MRIO Global Value Chain Decomposition (Version 1.0.0). Zenodo. https://doi.org/10.5281/zenodo.17648887
 
 **BibTeX:**
 ```bibtex
 @manual{adbmrio_pkg,
   title        = {adbmrio: Computational Framework for ADB MRIO Global Value Chain Decomposition},
-  author       = {Babu Ballav},
+  author       = {Bhusal, L.B.},
   year         = {2025},
   note         = {R package version 1.0.0},
   doi          = {10.5281/zenodo.17648887},
