@@ -1,4 +1,5 @@
 # adbmrio: Computational Framework for ADB MRIO Global Value Chain Decomposition
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17648887.svg)](https://doi.org/10.5281/zenodo.17648887)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![R](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue.svg)](https://www.r-project.org/)
 
@@ -652,18 +653,28 @@ Contributions, bug reports, and feature requests are welcome! Please feel free t
 
 ---
 
-## Contact & Citation
+## Contact
 
 **Package Maintainer**: Lila Ballav Bhusal  
 **GitHub**: [BallavBabu/adbmrio](https://github.com/BallavBabu/adbmrio)
 
 ### Citation
-If you use this package in your research, please cite:
-```
-Bhusal, L.B. (2025). adbmrio: Computational Framework for ADB MRIO Global Value Chain Decomposition. 
-R package version 0.1.0. https://github.com/BallavBabu/adbmrio
-```
 
+If you use the `adbmrio` package in your research, please cite it alongside the methodology:
+```
+> Ballav, B. (2025). adbmrio: Computational Framework for ADB MRIO Global Value Chain Decomposition (Version 1.0.0). Zenodo. https://doi.org/10.5281/zenodo.17648887
+
+**BibTeX:**
+```bibtex
+@manual{adbmrio_pkg,
+  title        = {adbmrio: Computational Framework for ADB MRIO Global Value Chain Decomposition},
+  author       = {Babu Ballav},
+  year         = {2025},
+  note         = {R package version 1.0.0},
+  doi          = {10.5281/zenodo.17648887},
+  url          = {[https://github.com/BallavBabu/adbmrio](https://github.com/BallavBabu/adbmrio)}
+}
+```
 ---
 
 ## References
