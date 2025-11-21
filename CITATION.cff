@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this dataset or software, please cite it as below."
+title: "ADB MRIO Panel Data (2000-2023) for Global Value Chain Analysis"
+version: 1.0.0
+doi: 10.5281/zenodo.17648887
+date-released: 2025-11-21
+url: "https://doi.org/10.5281/zenodo.17648887"
+type: dataset
+
+authors:
+  - family-names: "Bhusal"
+    given-names: "Lila Ballav"
+    affiliation: "Yokohama National University, Graduate School of International Social Sciences"
+
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.17648887
+    description: "The concept DOI for the collection."
+
+keywords:
+  - MRIO
+  - "Global Value Chain"
+  - "Input-Output Tables"
+  - "ADB MRIO"
+  - "Asian Development Bank"
