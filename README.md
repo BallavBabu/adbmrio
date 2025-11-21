@@ -674,7 +674,7 @@ Wang, Z., Wei, S. J., & Zhu, K. (2013). *Quantifying International Production Sh
 
 Wang, Z., Wei, S. J., Yu, X., & Zhu, K. (2018). *Characterizing Global Value Chains: Production Length and Upstreamness* (NBER Working Paper No. 23261). National Bureau of Economic Research.
 
-Asian Development Bank. (2024). *Multi-Regional Input-Output Tables*. Available at: https://mrio.adbx.online/
+Asian Development Bank. (2025). *Multi-Regional Input-Output Tables*. Available at: https://kidb.adb.org/globalization
 
 ---
 
